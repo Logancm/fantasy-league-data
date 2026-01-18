@@ -7,7 +7,6 @@ A modern web app to view your Sleeper fantasy football league data. Enter your l
 - 📊 **Standings** - View league rankings with wins, losses, and points
 - 👥 **Users** - See all league members and their profiles
 - 📝 **Transactions** - Track all trades, waivers, and free agent pickups
-- 📱 **Mobile-First** - Optimized for mobile and desktop viewing
 
 ## Getting Started
 
