@@ -35,7 +35,7 @@ export default function DraftComponent({ drafts, draftPicks, users, players }: D
   if (drafts.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-400">No drafts available for this league</p>
+        <p className="text-gray-400">No drafts available for this league</p>
       </div>
     )
   }
@@ -106,8 +106,8 @@ export default function DraftComponent({ drafts, draftPicks, users, players }: D
               onClick={() => setSelectedDraftIndex(index)}
               className={`px-4 py-2 rounded-lg font-semibold text-sm transition duration-200 whitespace-nowrap ${
                 selectedDraftIndex === index
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
               {draft.season}
@@ -119,8 +119,8 @@ export default function DraftComponent({ drafts, draftPicks, users, players }: D
       {/* Empty State */}
       {hasNoPicks && (
         <div className="text-center py-12">
-          <p className="text-slate-400 text-lg">No draft data available for {currentDraft.season}</p>
-          <p className="text-slate-500 text-sm mt-2">This year either has no completed draft or the draft data is not available</p>
+          <p className="text-gray-400 text-lg">No draft data available for {currentDraft.season}</p>
+          <p className="text-gray-500 text-sm mt-2">This year either has no completed draft or the draft data is not available</p>
         </div>
       )}
 
@@ -131,8 +131,8 @@ export default function DraftComponent({ drafts, draftPicks, users, players }: D
             {draftSlots.map(slot => (
               <div key={slot.draftSlot} className="flex-shrink-0 w-24 md:w-32">
                 {/* Team Header */}
-                <div className="bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-500 rounded p-1 md:p-2 mb-1 md:mb-2">
-                  <p className="text-xs text-slate-400 truncate">@{slot.displayName}</p>
+                <div className="bg-gradient-to-r from-primary-900/30 to-primary-800/30 border border-primary-500 rounded p-1 md:p-2 mb-1 md:mb-2">
+                  <p className="text-xs text-gray-400 truncate">@{slot.displayName}</p>
                   <p className="font-semibold text-white text-xs truncate">{slot.teamName}</p>
                 </div>
 
@@ -146,7 +146,7 @@ export default function DraftComponent({ drafts, draftPicks, users, players }: D
                       return (
                         <div
                           key={`${slot.draftSlot}-${round}`}
-                          className="bg-slate-800 border border-slate-700 rounded p-0.5 md:p-1 h-10 md:h-14"
+                          className="bg-gray-800 border border-gray-700 rounded p-0.5 md:p-1 h-10 md:h-14"
                         />
                       )
                     }
@@ -170,13 +170,13 @@ export default function DraftComponent({ drafts, draftPicks, users, players }: D
                             <span className={`${colors.badge} text-white text-xs font-bold px-0.5 md:px-1 rounded flex-shrink-0`}>
                               {pick.metadata.position}
                             </span>
-                            <span className="text-xs text-slate-300 font-semibold">{pick.round}.{String(pickInRound).padStart(2, '0')}</span>
+                            <span className="text-xs text-gray-300 font-semibold">{pick.round}.{String(pickInRound).padStart(2, '0')}</span>
                           </div>
                           <div className="text-xs font-bold text-white leading-tight">
                             <p className="truncate">{firstName}</p>
                             <p className="truncate">{lastName}</p>
                           </div>
-                          <p className="text-xs text-slate-400 truncate">{pickerDisplayName}</p>
+                          <p className="text-xs text-gray-400 truncate">{pickerDisplayName}</p>
                         </div>
                       </div>
                     )

@@ -56,7 +56,7 @@ const getPositionColor = (
     default:
       return {
         bg: "bg-slate-800/40",
-        text: "text-slate-400",
+        text: "text-gray-400",
         border: "border-slate-500/30",
       };
   }
@@ -84,7 +84,7 @@ export default function Transactions({
       case "free_agent":
         return "bg-green-500/20 text-green-400 border-green-500/30";
       default:
-        return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+        return "bg-slate-500/20 text-gray-400 border-slate-500/30";
     }
   };
 
@@ -154,8 +154,8 @@ export default function Transactions({
                 onClick={() => setFilter(f)}
                 className={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm transition duration-200 flex-1 sm:flex-none ${
                   filter === f
-                    ? "bg-indigo-600 text-white"
-                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                    ? "bg-primary-600 text-white"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
                 {f === "all" ? "All" : f === "trade" ? "Trades" : "Waiver"}
@@ -165,7 +165,7 @@ export default function Transactions({
           <select
             value={selectedUserId || ""}
             onChange={(e) => setSelectedUserId(e.target.value || null)}
-            className="w-full md:w-auto px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600 transition duration-200 cursor-pointer"
+            className="w-full md:w-auto px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600 transition duration-200 cursor-pointer"
           >
             <option value="">All Members</option>
             {users.map((user) => (
@@ -176,7 +176,7 @@ export default function Transactions({
           </select>
         </div>
         <div className="text-center py-12">
-          <p className="text-slate-400">No transactions yet</p>
+          <p className="text-gray-400">No transactions yet</p>
         </div>
       </div>
     );
@@ -192,8 +192,8 @@ export default function Transactions({
               onClick={() => setFilter(f)}
               className={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm transition duration-200 flex-1 sm:flex-none ${
                 filter === f
-                  ? "bg-indigo-600 text-white"
-                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  ? "bg-primary-600 text-white"
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
             >
               {f === "all" ? "All" : f === "trade" ? "Trades" : "Waiver"}
@@ -203,7 +203,7 @@ export default function Transactions({
         <select
           value={selectedUserId || ""}
           onChange={(e) => setSelectedUserId(e.target.value || null)}
-          className="w-full md:w-auto px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600 transition duration-200 cursor-pointer"
+          className="w-full md:w-auto px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600 transition duration-200 cursor-pointer"
         >
           <option value="">All Members</option>
           {users.map((user) => (
@@ -229,7 +229,7 @@ export default function Transactions({
           return (
             <div
               key={transaction.transaction_id}
-              className="bg-slate-800 border border-slate-700 rounded-lg p-4"
+              className="bg-gray-800 border border-gray-700 rounded-lg p-4"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3 flex-wrap">
@@ -246,7 +246,7 @@ export default function Transactions({
                             .join(" ↔ ")
                         : displayName}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-gray-400">
                       {formatDate(transaction.status_updated)}
                     </p>
                   </div>
@@ -316,8 +316,8 @@ export default function Transactions({
                       return null;
 
                     return (
-                      <div key={user.user_id}>
-                        <p className="text-xs font-semibold text-indigo-400 mb-2">
+                      <div key={`${transaction.transaction_id}-${rosterId}`}>
+                        <p className="text-xs font-semibold text-primary-400 mb-2">
                           {user.display_name || user.username}
                         </p>
                         {(receivedPlayers.length > 0 ||

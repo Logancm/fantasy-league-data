@@ -108,3 +108,21 @@ export interface DraftPick {
   is_keeper: boolean | null
   draft_id: string
 }
+
+export interface RookieDraftPick {
+  season: string
+  round: number
+  original_slot: number
+  roster_id: number
+  owner_id?: string
+}
+
+export interface TradeValue {
+  name_id: string
+  trade_value: number
+  sf_trade_value: number
+  sf_position_rank: number
+  position_rank: number
+}
+
+export type TradeValuesMap = Record<string, TradeValue>

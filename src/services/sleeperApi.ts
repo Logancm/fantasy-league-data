@@ -20,6 +20,37 @@ export async function getLeague(leagueId: string): Promise<League> {
   return data
 }
 
+export async function getLeaguesByUsername(username: string, season?: number): Promise<League[]> {
+  // First, get the user ID from the username
+  const userResponse = await fetch(`${BASE_URL}/user/${username}`)
+  if (!userResponse.ok) {
+    if (userResponse.status === 404) {
+      throw new Error('User not found. Please check your username.')
+    }
+    throw new Error(`Failed to fetch user: ${userResponse.statusText}`)
+  }
+
+  const user = await userResponse.json()
+  const userId = user.user_id
+
+  if (!userId) {
+    throw new Error('Could not retrieve user ID.')
+  }
+
+  // Now fetch leagues using the user ID
+  const url = season
+    ? `${BASE_URL}/user/${userId}/leagues/nfl/${season}`
+    : `${BASE_URL}/user/${userId}/leagues/nfl`
+
+  const leaguesResponse = await fetch(url)
+  if (!leaguesResponse.ok) {
+    throw new Error(`Failed to fetch leagues: ${leaguesResponse.statusText}`)
+  }
+
+  const data = await leaguesResponse.json()
+  return Array.isArray(data) ? data : []
+}
+
 export async function getRosters(leagueId: string): Promise<Roster[]> {
   const response = await fetch(`${BASE_URL}/league/${leagueId}/rosters`)
   if (!response.ok) {
@@ -159,6 +190,19 @@ export async function getDraftPicks(draftId: string): Promise<DraftPick[]> {
       return []
     }
     throw new Error(`Failed to fetch draft picks: ${response.statusText}`)
+  }
+  const data = await response.json()
+  return Array.isArray(data) ? data : []
+}
+
+// Fetch traded picks for a league (future picks that have been traded)
+export async function getTradedPicks(leagueId: string): Promise<any[]> {
+  const response = await fetch(`${BASE_URL}/league/${leagueId}/traded_picks`)
+  if (!response.ok) {
+    if (response.status === 404) {
+      return []
+    }
+    throw new Error(`Failed to fetch traded picks: ${response.statusText}`)
   }
   const data = await response.json()
   return Array.isArray(data) ? data : []
