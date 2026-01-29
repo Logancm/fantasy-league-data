@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Transaction, User, Roster, PlayersMap } from "../types/sleeper";
 import { getPlayerInfo } from "../services/sleeperApi";
+import { getPositionColor } from "../utils/colors";
 
 interface TransactionsProps {
   transactions: Transaction[];
@@ -10,57 +11,6 @@ interface TransactionsProps {
 }
 
 type FilterType = "all" | "trade" | "waivers";
-
-// Position color mapping (reused from other components)
-const getPositionColor = (
-  position: string,
-): { bg: string; text: string; border: string } => {
-  switch (position) {
-    case "QB":
-      return {
-        bg: "bg-red-900/40",
-        text: "text-red-400",
-        border: "border-red-500/30",
-      };
-    case "RB":
-      return {
-        bg: "bg-green-900/40",
-        text: "text-green-400",
-        border: "border-green-500/30",
-      };
-    case "WR":
-      return {
-        bg: "bg-blue-900/40",
-        text: "text-blue-400",
-        border: "border-blue-500/30",
-      };
-    case "TE":
-      return {
-        bg: "bg-amber-900/40",
-        text: "text-amber-400",
-        border: "border-amber-500/30",
-      };
-    case "K":
-      return {
-        bg: "bg-yellow-900/40",
-        text: "text-yellow-400",
-        border: "border-yellow-500/30",
-      };
-    case "DEF":
-    case "D":
-      return {
-        bg: "bg-purple-900/40",
-        text: "text-purple-400",
-        border: "border-purple-500/30",
-      };
-    default:
-      return {
-        bg: "bg-slate-800/40",
-        text: "text-gray-400",
-        border: "border-slate-500/30",
-      };
-  }
-};
 
 export default function Transactions({
   transactions,

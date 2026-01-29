@@ -1,4 +1,5 @@
 import { Roster, PlayersMap, User, RookieDraftPick } from '../types/sleeper'
+import { getPositionColor } from '../utils/colors'
 
 interface RosterProps {
   roster: Roster | null
@@ -10,27 +11,6 @@ interface RosterProps {
   playerTradeValues: Map<string, number>
   rosterValue?: number
   rookieDraftPicks?: RookieDraftPick[]
-}
-
-// Position color mapping
-const getPositionColor = (position: string): { bg: string; border: string; badge: string } => {
-  switch (position) {
-    case 'QB':
-      return { bg: 'bg-red-900/40', border: 'border-red-500', badge: 'bg-red-500' }
-    case 'RB':
-      return { bg: 'bg-green-900/40', border: 'border-green-500', badge: 'bg-green-500' }
-    case 'WR':
-      return { bg: 'bg-blue-900/40', border: 'border-blue-500', badge: 'bg-blue-500' }
-    case 'TE':
-      return { bg: 'bg-amber-900/40', border: 'border-amber-500', badge: 'bg-amber-500' }
-    case 'K':
-      return { bg: 'bg-yellow-900/40', border: 'border-yellow-500', badge: 'bg-yellow-500' }
-    case 'DEF':
-    case 'D':
-      return { bg: 'bg-purple-900/40', border: 'border-purple-500', badge: 'bg-purple-500' }
-    default:
-      return { bg: 'bg-slate-800', border: 'border-slate-600', badge: 'bg-slate-500' }
-  }
 }
 
 const PlayerCard = (

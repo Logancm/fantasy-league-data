@@ -1,4 +1,4 @@
-import { League, Roster, User, Transaction, PlayersMap, SeasonData, Draft, DraftPick } from '../types/sleeper'
+import { League, Roster, User, Transaction, PlayersMap, SeasonData, Draft, DraftPick, TradedPick } from '../types/sleeper'
 
 const BASE_URL = 'https://api.sleeper.app/v1'
 
@@ -164,8 +164,8 @@ export async function getDrafts(leagueId: string, maxYears: number = 3): Promise
         const data = await response.json()
         if (Array.isArray(data)) {
           data.forEach(draft => {
-            // Add draft if we haven't seen this season yet
-            if (!seenSeasons.has(draft.season)) {
+            // Validate draft has required fields
+            if (draft && draft.draft_id && draft.draft_order && !seenSeasons.has(draft.season)) {
               seenSeasons.add(draft.season)
               allDrafts.push(draft)
             }
@@ -192,11 +192,25 @@ export async function getDraftPicks(draftId: string): Promise<DraftPick[]> {
     throw new Error(`Failed to fetch draft picks: ${response.statusText}`)
   }
   const data = await response.json()
-  return Array.isArray(data) ? data : []
+  if (!Array.isArray(data)) {
+    return []
+  }
+
+  // Filter out picks with missing critical metadata
+  return data.filter(pick =>
+    pick &&
+    pick.metadata &&
+    pick.metadata.first_name &&
+    pick.metadata.last_name &&
+    pick.metadata.position &&
+    pick.draft_slot &&
+    pick.round &&
+    pick.picked_by
+  )
 }
 
 // Fetch traded picks for a league (future picks that have been traded)
-export async function getTradedPicks(leagueId: string): Promise<any[]> {
+export async function getTradedPicks(leagueId: string): Promise<TradedPick[]> {
   const response = await fetch(`${BASE_URL}/league/${leagueId}/traded_picks`)
   if (!response.ok) {
     if (response.status === 404) {
@@ -205,5 +219,5 @@ export async function getTradedPicks(leagueId: string): Promise<any[]> {
     throw new Error(`Failed to fetch traded picks: ${response.statusText}`)
   }
   const data = await response.json()
-  return Array.isArray(data) ? data : []
+  return Array.isArray(data) ? (data as TradedPick[]) : []
 }

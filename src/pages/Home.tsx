@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { getLeaguesByUsername } from '../services/sleeperApi'
 import { League } from '../types/sleeper'
 import { mockLeague, mockRosters, mockUsers, mockTransactions, mockPlayers } from '../utils/mockData'
+import { DEMO_LEAGUE_ID, ERROR_MESSAGES } from '../constants'
+import { getSeasonYears } from '../utils/season'
 
 type Tab = 'league-id' | 'username'
 
@@ -18,33 +20,49 @@ export default function Home() {
   const handleLeagueIdSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!leagueId.trim()) {
-      setError('Please enter a league ID')
+    const trimmedId = leagueId.trim()
+    if (!trimmedId) {
+      setError(ERROR_MESSAGES.INVALID_INPUT)
+      return
+    }
+
+    if (trimmedId.length < 5) {
+      setError('League ID must be at least 5 characters')
       return
     }
 
     setError('')
-    navigate(`/league/${leagueId}`)
+    navigate(`/league/${trimmedId}`)
   }
 
   const handleUsernameSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!username.trim()) {
-      setError('Please enter a username')
+    const trimmedUsername = username.trim()
+    if (!trimmedUsername) {
+      setError(ERROR_MESSAGES.INVALID_INPUT)
+      return
+    }
+
+    if (trimmedUsername.length < 2) {
+      setError('Username must be at least 2 characters')
+      return
+    }
+
+    if (trimmedUsername.length > 20) {
+      setError('Username must not exceed 20 characters')
       return
     }
 
     try {
       setLoading(true)
       setError('')
-      const currentYear = new Date().getFullYear()
-      const previousYear = currentYear - 1
+      const [currentYear, previousYear] = getSeasonYears()
 
       // Fetch leagues from current year and previous year
       const [currentYearLeagues, previousYearLeagues] = await Promise.all([
-        getLeaguesByUsername(username, currentYear).catch(() => []),
-        getLeaguesByUsername(username, previousYear).catch(() => []),
+        getLeaguesByUsername(trimmedUsername, currentYear).catch(() => []),
+        getLeaguesByUsername(trimmedUsername, previousYear).catch(() => []),
       ])
 
       // Deduplicate leagues by name, keeping the newest (highest season)
@@ -62,12 +80,12 @@ export default function Home() {
       const allLeagues = Array.from(leagueMap.values())
 
       if (allLeagues.length === 0) {
-        setError(`No leagues found for user "${username}"`)
+        setError(ERROR_MESSAGES.NO_LEAGUES_FOUND(trimmedUsername))
       } else {
         setLeagues(allLeagues)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch leagues')
+      setError(err instanceof Error ? err.message : ERROR_MESSAGES.FAILED_TO_FETCH_LEAGUE)
     } finally {
       setLoading(false)
     }
@@ -79,7 +97,13 @@ export default function Home() {
 
   const handleDemoClick = () => {
     // Navigate to demo league with mock data
-    navigate(`/league/demo`)
+    navigate(`/league/${DEMO_LEAGUE_ID}`)
+  }
+
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab)
+    setError('')
+    setLeagues([])
   }
 
   return (
@@ -103,11 +127,7 @@ export default function Home() {
         {/* Tab Navigation */}
         <div className="flex gap-2 mb-6 border-b border-gray-700">
           <button
-            onClick={() => {
-              setActiveTab('username')
-              setError('')
-              setLeagues([])
-            }}
+            onClick={() => handleTabChange('username')}
             className={`flex-1 py-2 font-semibold text-sm transition ${
               activeTab === 'username'
                 ? 'text-primary-400 border-b-2 border-primary-500'
@@ -117,11 +137,7 @@ export default function Home() {
             By Username
           </button>
           <button
-            onClick={() => {
-              setActiveTab('league-id')
-              setError('')
-              setLeagues([])
-            }}
+            onClick={() => handleTabChange('league-id')}
             className={`flex-1 py-2 font-semibold text-sm transition ${
               activeTab === 'league-id'
                 ? 'text-primary-400 border-b-2 border-primary-500'

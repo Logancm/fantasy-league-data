@@ -117,6 +117,14 @@ export interface RookieDraftPick {
   owner_id?: string
 }
 
+export interface TradedPick {
+  season: number
+  round: number
+  original_slot: number
+  roster_id: number
+  owner_id: number
+}
+
 export interface TradeValue {
   name_id: string
   trade_value: number

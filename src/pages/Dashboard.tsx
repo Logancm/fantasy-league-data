@@ -10,6 +10,9 @@ import Teams from '../components/Users'
 import Transactions from '../components/Transactions'
 import RosterComponent from '../components/Roster'
 import DraftComponent from '../components/Draft'
+import { DEMO_LEAGUE_ID, ERROR_MESSAGES } from '../constants'
+import { logger } from '../services/logger'
+import { processTradedPicks } from '../utils/tradedPicks'
 
 type Tab = 'standings' | 'users' | 'transactions' | 'roster' | 'draft'
 
@@ -43,7 +46,7 @@ export default function Dashboard() {
         let leagueData, rostersData, usersData
 
         // Use mock data if demo league
-        if (leagueId === 'demo') {
+        if (leagueId === DEMO_LEAGUE_ID) {
           leagueData = mockLeague
           rostersData = mockRosters
           usersData = mockUsers
@@ -61,7 +64,7 @@ export default function Dashboard() {
         setUsers(usersData)
 
         // Fetch transactions, players, league history, and drafts in background
-        if (leagueId === 'demo') {
+        if (leagueId === DEMO_LEAGUE_ID) {
           setTransactions(mockTransactions)
           setPlayers(mockPlayers)
           setLeagueHistory([{ league: leagueData, rosters: rostersData, users: usersData }])
@@ -75,99 +78,31 @@ export default function Dashboard() {
           setDraftPicks(picksMap)
           setTradedPicks(mockRookieDraftPicks)
         } else {
-          getAllTransactions(leagueId).then(setTransactions).catch(console.error)
-          getPlayers().then(setPlayers).catch(console.error)
-          getLeagueHistory(leagueId, 3).then(setLeagueHistory).catch(console.error)
+          getAllTransactions(leagueId).then(setTransactions).catch(err => logger.error('Failed to fetch transactions', err))
+          getPlayers().then(setPlayers).catch(err => logger.error('Failed to fetch players', err))
+          getLeagueHistory(leagueId, 3).then(setLeagueHistory).catch(err => logger.error('Failed to fetch league history', err))
           getDrafts(leagueId).then(draftsData => {
             setDrafts(draftsData)
             // Fetch picks for each draft
             draftsData.forEach(draft => {
               getDraftPicks(draft.draft_id).then(picks => {
                 setDraftPicks(prev => new Map(prev).set(draft.draft_id, picks))
-              }).catch(console.error)
+              }).catch(err => logger.error('Failed to fetch draft picks', err))
             })
-          }).catch(console.error)
+          }).catch(err => logger.error('Failed to fetch drafts', err))
 
           // Fetch traded picks to build future draft picks
           getTradedPicks(leagueId).then(tradedPicksData => {
-            const rookiePicksMap = new Map<string, RookieDraftPick>()
-            const tradedAwayPicks = new Set<string>()
-            const maxRoundByYear = new Map<string, number>()
-
-            // Process traded picks and find max round per year
-            tradedPicksData.forEach((tradedPick: any) => {
-              // Track the highest round seen for each year
-              const currentMax = maxRoundByYear.get(tradedPick.season) || 0
-              if (tradedPick.round > currentMax) {
-                maxRoundByYear.set(tradedPick.season, tradedPick.round)
-              }
-
-              // If owner_id !== roster_id, this pick was traded away from original owner
-              if (tradedPick.owner_id !== tradedPick.roster_id) {
-                // This pick was traded away, mark it so we don't generate it as an original pick
-                const tradedAwayKey = `${tradedPick.season}-${tradedPick.round}-${tradedPick.roster_id}`
-                tradedAwayPicks.add(tradedAwayKey)
-              }
-
-              // Create unique key using both original_slot and owner_id to allow multiple picks per owner per round
-              const key = `${tradedPick.season}-${tradedPick.round}-${tradedPick.roster_id}-${tradedPick.owner_id}`
-
-              // Find which user currently owns this pick
-              const currentRoster = rostersData?.find((r: any) => r.roster_id === tradedPick.owner_id)
-              const currentUserId = currentRoster?.owner_id
-
-              // Find which user originally owned this pick
-              const originalRoster = rostersData?.find((r: any) => r.roster_id === tradedPick.roster_id)
-              const originalUserId = originalRoster?.owner_id
-
-              // Add the pick to whoever currently owns it, with original owner info if traded
-              rookiePicksMap.set(key, {
-                season: String(tradedPick.season),
-                round: tradedPick.round,
-                original_slot: tradedPick.original_slot,
-                roster_id: tradedPick.owner_id,
-                owner_id: originalUserId // Store the original owner's user_id for display
-              })
-            })
-
-            // Add original picks that haven't been traded away
-            // Each team has 1 pick per round in 2026 and 2027 (unless traded)
-            rostersData?.forEach((roster: any) => {
-              if (roster.roster_id && roster.owner_id) {
-                // Check only 2026 and 2027
-                for (let year of [2026, 2027]) {
-                  // Get the max round for this year, or default to 4
-                  const maxRound = maxRoundByYear.get(String(year)) || 4
-
-                  // Check all rounds up to the max seen
-                  for (let round = 1; round <= maxRound; round++) {
-                    // Check if this team traded away their pick for this year/round
-                    const tradedAwayKey = `${year}-${round}-${roster.roster_id}`
-
-                    // Only add if this pick wasn't traded away
-                    if (!tradedAwayPicks.has(tradedAwayKey)) {
-                      const pickKey = `${year}-${round}-${roster.roster_id}-${roster.roster_id}`
-                      rookiePicksMap.set(pickKey, {
-                        season: String(year),
-                        round: round,
-                        original_slot: roster.roster_id,
-                        roster_id: roster.roster_id
-                      })
-                    }
-                  }
-                }
-              }
-            })
-
-            setTradedPicks(Array.from(rookiePicksMap.values()))
-          }).catch(console.error)
+            const picks = processTradedPicks(tradedPicksData, rostersData || [])
+            setTradedPicks(picks)
+          }).catch(err => logger.error('Failed to fetch traded picks', err))
         }
 
       } catch (err) {
         setError(
           err instanceof Error
             ? err.message
-            : 'Failed to load league data. Please check the league ID and try again.'
+            : ERROR_MESSAGES.FAILED_TO_FETCH_LEAGUE
         )
       } finally {
         setLoading(false)

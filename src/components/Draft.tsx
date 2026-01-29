@@ -1,36 +1,36 @@
 import { useState } from 'react'
 import { Draft, DraftPick, PlayersMap, User } from '../types/sleeper'
+import { getPositionColor } from '../utils/colors'
 
 interface DraftProps {
   drafts: Draft[]
   draftPicks: Map<string, DraftPick[]>
   users: User[]
   players: PlayersMap
+  error?: string
+  isLoading?: boolean
 }
 
-// Position color mapping (reused from Roster)
-const getPositionColor = (position: string): { bg: string; border: string; badge: string } => {
-  switch (position) {
-    case 'QB':
-      return { bg: 'bg-red-900/40', border: 'border-red-500', badge: 'bg-red-500' }
-    case 'RB':
-      return { bg: 'bg-green-900/40', border: 'border-green-500', badge: 'bg-green-500' }
-    case 'WR':
-      return { bg: 'bg-blue-900/40', border: 'border-blue-500', badge: 'bg-blue-500' }
-    case 'TE':
-      return { bg: 'bg-amber-900/40', border: 'border-amber-500', badge: 'bg-amber-500' }
-    case 'K':
-      return { bg: 'bg-yellow-900/40', border: 'border-yellow-500', badge: 'bg-yellow-500' }
-    case 'DEF':
-    case 'D':
-      return { bg: 'bg-purple-900/40', border: 'border-purple-500', badge: 'bg-purple-500' }
-    default:
-      return { bg: 'bg-slate-800', border: 'border-slate-600', badge: 'bg-slate-500' }
-  }
-}
-
-export default function DraftComponent({ drafts, draftPicks, users, players }: DraftProps) {
+export default function DraftComponent({ drafts, draftPicks, users, players, error, isLoading }: DraftProps) {
   const [selectedDraftIndex, setSelectedDraftIndex] = useState(0)
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-8 h-8 border-4 border-gray-600 border-t-primary-500 rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-400">Loading draft data...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-900/20 border border-red-700 rounded-lg p-6 text-center">
+        <p className="text-red-400 font-semibold mb-2">Failed to load draft data</p>
+        <p className="text-red-300 text-sm">{error}</p>
+      </div>
+    )
+  }
 
   if (drafts.length === 0) {
     return (
@@ -40,7 +40,17 @@ export default function DraftComponent({ drafts, draftPicks, users, players }: D
     )
   }
 
+  // Validate critical data
   const currentDraft = drafts[selectedDraftIndex]
+  if (!currentDraft || !currentDraft.draft_id || !currentDraft.draft_order) {
+    return (
+      <div className="bg-red-900/20 border border-red-700 rounded-lg p-6 text-center">
+        <p className="text-red-400 font-semibold mb-2">Invalid draft data</p>
+        <p className="text-red-300 text-sm">The draft data appears to be corrupted. Please refresh the page.</p>
+      </div>
+    )
+  }
+
   const picks = draftPicks.get(currentDraft.draft_id) || []
   const hasNoPicks = picks.length === 0
 
