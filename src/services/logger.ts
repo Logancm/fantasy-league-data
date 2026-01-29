@@ -18,7 +18,7 @@ interface LogEntry {
 }
 
 class Logger {
-  private isDevelopment = (import.meta.env.DEV as boolean) ?? false
+  private isDevelopment = typeof import.meta !== 'undefined' && (import.meta as any).env?.DEV === true
 
   private formatLog(entry: LogEntry): string {
     return `[${entry.timestamp}] ${entry.level}: ${entry.message}`
