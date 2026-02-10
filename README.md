@@ -2,6 +2,8 @@
 
 A modern web app to view your Sleeper fantasy football league data. Enter your league ID to see standings, users, and transactions at a glance.
 
+[https://fantasy-league-data.vercel.app/](https://fantasy-league-data.vercel.app/)
+
 ## Features
 
 - 📊 **Standings** - View league rankings with wins, losses, and points
